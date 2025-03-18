@@ -32,7 +32,7 @@ const noMoreMessages = ref(false)
 const limit = ref(20)
 
 // Get current user ID from the store instead of localStorage
-const currentUserId = computed(() => userStore.getUserId.value)
+const currentUserId = computed(() => userStore.getUserId)
 
 // sort messages by date
 const sortedMessages = computed(() => {
@@ -78,7 +78,7 @@ async function loadMessages(before?: string) {
     error.value = ''
 
     try {
-        const token = userStore.getToken.value
+        const token = userStore.getToken
 
         if (!token) {
             router.push({ name: 'signin' })
@@ -150,7 +150,7 @@ async function loadMoreMessages() {
 // Get the count of messages
 async function getMessageCount() {
     try {
-        const token = userStore.getToken.value
+        const token = userStore.getToken
 
         if (!token) return
 
@@ -206,7 +206,7 @@ async function sendMessage() {
     error.value = ''
 
     try {
-        const token = userStore.getToken.value
+        const token = userStore.getToken
 
         if (!token) {
             router.push({ name: 'signin' })

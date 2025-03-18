@@ -8,11 +8,11 @@ export const useUserStore = defineStore('user', () => {
   const token = ref<string | null>(null)
   const isAuthenticated = ref(false)
   
-  // Getters as computed properties
-  const getUserId = computed(() => user.value?._id || '')
-  const getToken = computed(() => token.value)
-  const getUserData = computed(() => user.value)
-  const getIsAuthenticated = computed(() => isAuthenticated.value)
+  // Getters as computed properties with proper typing
+  const getUserId = computed((): string => user.value?._id || '')
+  const getToken = computed((): string | null => token.value)
+  const getUserData = computed((): user | null => user.value)
+  const getIsAuthenticated = computed((): boolean => isAuthenticated.value)
   
   // Actions as functions
   function setUserData(userData: userData) {

@@ -6,13 +6,13 @@ import { useUserStore } from '../stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
-const username = computed(() => userStore.getUserData.value?.userName || '')
+const username = computed(() => userStore.getUserData?.userName || '')
 const data = ref('')
 const dropdownOpen = ref(false)
 
 onMounted(() => {
 	// Check authentication from the store
-	if (!userStore.getIsAuthenticated.value) {
+	if (!userStore.getIsAuthenticated) {
 		router.push({ name: 'home' })
 		return
 	}
@@ -25,7 +25,7 @@ async function logout() {
 	const options = {
 		method: 'GET',
 		headers: {
-			Authorization: `Bearer ${userStore.getToken.value}`,
+			Authorization: `Bearer ${userStore.getToken}`,
 		},
 	}
 
@@ -56,7 +56,7 @@ async function deleteAccount() {
 	const options = {
 		method: 'DELETE',
 		headers: {
-			Authorization: `Bearer ${userStore.getToken.value}`,
+			Authorization: `Bearer ${userStore.getToken}`,
 		},
 	}
 	const response = await fetch(url, options)
