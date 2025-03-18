@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import type { Message, MessageCount } from '@/types'
 
 // Define the prop for userId passed from the router
@@ -16,6 +17,7 @@ const props = defineProps({
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const receiverName = ref(route.query.name?.toString() || 'User')
 const messages = ref<Message[]>([])
 const newMessage = ref('')
@@ -29,7 +31,8 @@ const loadMoreLoading = ref(false)
 const noMoreMessages = ref(false)
 const limit = ref(20)
 
-const currentUserId = ref(localStorage.getItem('userId') || '')
+// Get current user ID from the store instead of localStorage
+const currentUserId = computed(() => userStore.getUserId.value)
 
 // sort messages by date
 const sortedMessages = computed(() => {
@@ -75,7 +78,7 @@ async function loadMessages(before?: string) {
     error.value = ''
 
     try {
-        const token = localStorage.getItem('token')
+        const token = userStore.getToken.value
 
         if (!token) {
             router.push({ name: 'signin' })
@@ -147,7 +150,7 @@ async function loadMoreMessages() {
 // Get the count of messages
 async function getMessageCount() {
     try {
-        const token = localStorage.getItem('token')
+        const token = userStore.getToken.value
 
         if (!token) return
 
@@ -181,7 +184,7 @@ function formatDate(dateString: string): string {
 
 // Check if a message was sent by the current user
 function isCurrentUserMessage(message: Message): boolean {
-    // Check if the senderId matches the current user's ID (from localStorage)
+    // Use the computed property instead of directly accessing localStorage
     return message.senderId === currentUserId.value
 }
 
@@ -203,7 +206,7 @@ async function sendMessage() {
     error.value = ''
 
     try {
-        const token = localStorage.getItem('token')
+        const token = userStore.getToken.value
 
         if (!token) {
             router.push({ name: 'signin' })
@@ -259,21 +262,6 @@ watch(() => props.userId, () => {
 
 // Initial load of messages
 onMounted(() => {
-    // Try to get the current user ID
-    if (!currentUserId.value) {
-        const storedData = localStorage.getItem('userData')
-        if (storedData) {
-            try {
-                const userData = JSON.parse(storedData)
-                if (userData && userData._id) {
-                    currentUserId.value = userData._id
-                }
-            } catch (e) {
-                console.error('Error parsing user data:', e)
-            }
-        }
-    }
-
     loadMessages()
 })
 

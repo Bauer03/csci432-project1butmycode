@@ -3,8 +3,10 @@ import Header from '../components/HeaderNav.vue'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import type { userData } from '../types'
+import { useUserStore } from '../stores/user'
 
 const router = useRouter();
+const userStore = useUserStore();
 const username = ref('');
 const email = ref('');
 const password = ref('');
@@ -53,8 +55,7 @@ async function join() {
 
 	if (response.status === 201) {
 		const data: userData = await response.json()
-		localStorage.setItem('token', data.token)
-		localStorage.setItem('username', data.user.userName)
+		userStore.setUserData(data)
 		router.push({ name: 'main' })
 	} else if (response.status === 400) {
 		error.value = 'Invalid email or username.'

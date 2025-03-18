@@ -1,46 +1,38 @@
 <script setup lang="ts">
 import Header from '../components/HeaderNav.vue'
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useUserStore } from '../stores/user'
 
 const router = useRouter()
-const username = ref('')
+const userStore = useUserStore()
+const username = computed(() => userStore.getUserData.value?.userName || '')
 const data = ref('')
 const dropdownOpen = ref(false)
 
 onMounted(() => {
-	const storedUsername = localStorage.getItem('username')
-	const storedToken = localStorage.getItem('token')
-
-	if (!storedToken) {
-		console.log("No token found in localStorage");
+	// Check authentication from the store
+	if (!userStore.getIsAuthenticated.value) {
 		router.push({ name: 'home' })
 		return
 	}
-	if (!storedUsername) {
-		console.warn("No username found in localStorage");
-		return
-	}
+});
 
-	username.value = storedUsername
-})
-
-async function signOut() {
+// Handle logout
+async function logout() {
 	const url = 'https://hap-app-api.azurewebsites.net/user/logout'
 
 	const options = {
-		method: 'POST',
+		method: 'GET',
 		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${localStorage.getItem('token')}`,
+			Authorization: `Bearer ${userStore.getToken.value}`,
 		},
 	}
 
 	const response = await fetch(url, options)
 
 	if (response.status === 200) {
-		localStorage.removeItem('username')
-		localStorage.removeItem('token')
+		userStore.logout()
 		router.push({ name: 'home' })
 		return
 	} else {
@@ -64,14 +56,13 @@ async function deleteAccount() {
 	const options = {
 		method: 'DELETE',
 		headers: {
-			Authorization: `Bearer ${localStorage.getItem('token')}`,
+			Authorization: `Bearer ${userStore.getToken.value}`,
 		},
 	}
 	const response = await fetch(url, options)
 
 	if (response.status === 200) {
-		localStorage.removeItem('username')
-		localStorage.removeItem('token')
+		userStore.logout()
 		router.push({ name: 'home' })
 		return
 	} else if (response.status === 401) {
@@ -103,7 +94,7 @@ function navigateToSearch() {
 	<Header>
 		<nav>
 			<a @click="navigateToSearch">Find Users</a>
-			<a @click="signOut">Sign Out</a>
+			<a @click="logout">Sign Out</a>
 			<div class="account-dropdown">
 				<a @click="toggleAccountDropdown" class="account-trigger">
 					<span class="material-symbols-outlined">account_circle</span>
